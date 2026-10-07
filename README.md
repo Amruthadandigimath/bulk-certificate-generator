@@ -1,55 +1,53 @@
 # Bulk Certificate Generator API
 
-A FastAPI-based backend service for generating certificates in bulk. The system accepts a list of recipients, validates their details, generates individual PDF certificates, tracks job progress, handles individual failures independently, and provides APIs to retrieve generated certificates.
+A FastAPI-based backend service for generating certificates in bulk.
+
+The application accepts a list of recipients, validates their details, creates a certificate generation job, processes certificates in the background, tracks job progress, handles individual recipient failures without stopping the complete job, and provides an API to retrieve generated certificates.
+
+---
 
 ## Features
 
 - Bulk certificate generation
-- Recipient validation using Pydantic
-- Background processing using FastAPI BackgroundTasks
-- Job status and progress tracking
+- Recipient validation
+- Background certificate processing
+- Job status tracking
+- Real-time progress information
 - Individual recipient failure handling
-- PDF certificate generation using ReportLab
+- PDF certificate generation
 - Certificate retrieval through API
-- SQLite relational database using SQLAlchemy
-- Automated test suite using Pytest
+- Relational database using SQLite and SQLAlchemy
+- Automated tests using Pytest
+- Interactive API documentation using Swagger UI
+
+---
 
 ## Technology Stack
 
-- Python 3.11
-- FastAPI
-- SQLAlchemy
-- SQLite
-- ReportLab
-- Pydantic
-- Pytest
-- HTTPX
-- Uvicorn
+- **Python 3.11**
+- **FastAPI** - REST API framework
+- **SQLAlchemy** - ORM and database management
+- **SQLite** - Relational database
+- **ReportLab** - PDF certificate generation
+- **Pydantic** - Request validation
+- **Pytest** - Automated testing
+- **Uvicorn** - ASGI server
+- **HTTPX** - API testing
 
-## Project Structure
+---
 
-```text
-bulk-certificate-generator/
-│
-├── app/
-│   ├── main.py
-│   ├── database.py
-│   ├── models.py
-│   ├── schemas.py
-│   │
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   └── jobs.py
-│   │
-│   └── services/
-│       ├── __init__.py
-│       └── certificate_generator.py
-│
-├── tests/
-│   ├── __init__.py
-│   └── test_jobs.py
-│
-├── generated/
-├── requirements.txt
-├── .gitignore
-└── README.md
+# 1. Project Setup
+
+## Prerequisites
+
+Make sure the following are installed:
+
+- Python 3.11 or later
+- Git
+- pip
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/Amruthadandigimath/bulk-certificate-generator.git
+cd bulk-certificate-generator
