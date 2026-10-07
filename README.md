@@ -1,8 +1,8 @@
 # Bulk Certificate Generator API
 
-A FastAPI-based backend service for generating certificates in bulk.
+A FastAPI-based backend application for generating certificates in bulk.
 
-The application accepts a list of recipients, validates their details, creates a certificate generation job, processes certificates in the background, tracks job progress, handles individual recipient failures without stopping the complete job, and provides an API to retrieve generated certificates.
+The application accepts a list of recipients, validates their details, creates a certificate generation job, processes certificates in the background, tracks job progress, handles individual failures without stopping the complete job, and provides APIs to retrieve generated certificates.
 
 ---
 
@@ -10,160 +10,253 @@ The application accepts a list of recipients, validates their details, creates a
 
 - Bulk certificate generation
 - Recipient validation
-- Background certificate processing
-- Job status tracking
-- Real-time progress information
+- Background job processing
+- Job status and progress tracking
 - Individual recipient failure handling
-- PDF certificate generation
-- Certificate retrieval through API
-- Relational database using SQLite and SQLAlchemy
-- Automated tests using Pytest
-- Interactive API documentation using Swagger UI
-
----
-
-## Technology Stack
-
-- **Python 3.11**
-- **FastAPI** - REST API framework
-- **SQLAlchemy** - ORM and database management
-- **SQLite** - Relational database
-- **ReportLab** - PDF certificate generation
-- **Pydantic** - Request validation
-- **Pytest** - Automated testing
-- **Uvicorn** - ASGI server
-- **HTTPX** - API testing
+- Certificate PDF generation
+- Certificate retrieval
+- SQLite relational database
+- REST API using FastAPI
+- Automated test suite
+- Interactive Swagger API documentation
 
 ---
 
 # 1. Project Setup
-
-## Prerequisites
-
-Make sure the following are installed:
-
-- Python 3.11 or later
-- Git
-- pip
 
 ## Clone the Repository
 
 ```bash
 git clone https://github.com/Amruthadandigimath/bulk-certificate-generator.git
 cd bulk-certificate-generator
-Create a Virtual Environment
-For Windows:
-python -m venv venv
+```
 
-Activate the Virtual Environment
-For Windows PowerShell:
+## Create a Virtual Environment
+
+For Windows:
+
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+```bash
 venv\Scripts\activate
+```
 
 After activation, the terminal should show:
+
+```text
 (venv)
+```
 
-Install Dependencies
+## Install Dependencies
+
+Install all required Python packages:
+
+```bash
 pip install -r requirements.txt
+```
 
-The project uses SQLite, so no separate database server is required.
-2. How to Run the Application
-Start the FastAPI application using:
+The main dependencies include:
+
+- FastAPI
+- Uvicorn
+- SQLAlchemy
+- ReportLab
+- Pytest
+- HTTPX
+- Email-validator
+
+---
+
+# 2. How to Run the Application
+
+Make sure the virtual environment is activated.
+
+Run the FastAPI application using:
+
+```bash
 uvicorn app.main:app --reload
+```
 
-The application will be available at:
+The application will start at:
+
+```text
 http://127.0.0.1:8000
+```
 
-Swagger API Documentation
-FastAPI provides interactive API documentation using Swagger UI.
+You can verify the application by opening:
+
+```text
+http://127.0.0.1:8000/
+```
+
+Expected response:
+
+```json
+{
+  "message": "Bulk Certificate Generator API is running"
+}
+```
+
+---
+
+# 3. API Documentation
+
+FastAPI automatically provides interactive Swagger documentation.
+
 Open:
-http://127.0.0.1:8000/docs
 
-Swagger UI can be used to submit certificate generation requests, check job status, and retrieve generated certificates.
-3. How to Run Tests
-The project uses Pytest for automated testing.
+```text
+http://127.0.0.1:8000/docs
+```
+
+The Swagger UI allows you to:
+
+- Create certificate generation jobs
+- Check job status
+- Check job progress
+- Retrieve generated certificates
+- Test API endpoints directly
+
+---
+
+# 4. How to Run Tests
+
+The project contains automated tests covering the major required functionalities.
+
+Make sure the virtual environment is activated.
+
 Run:
+
+```bash
 pytest -v
+```
 
 The test suite covers:
+
 - Job creation
-- Invalid email validation
+- Recipient email validation
 - Empty recipient validation
 - Certificate generation
 - Job status and progress
-- Individual recipient failure handling
+- Individual certificate generation failure
 - Certificate retrieval
-The project contains 7 automated tests and all 7 tests pass successfully.
-Example result:
+
+Expected result:
+
+```text
 7 passed
+```
 
-4. How to Submit a Certificate Generation Request
-A certificate generation request is submitted using:
+---
+
+# 5. How to Submit a Certificate Generation Request
+
+Use the following endpoint:
+
+```http
 POST /api/jobs
+```
 
-The request contains:
-- Event name
-- Event date
-- List of recipients
-- Recipient name
-- Recipient email
-Using Swagger
-1. Start the application.
-2. Open:
-http://127.0.0.1:8000/docs
+The request accepts an event name, event date, and a list of recipients.
 
-3. Find POST /api/jobs.
-4. Click Try it out.
-5. Enter the request JSON.
-6. Click Execute.
-Example Request
+Example request:
+
+```json
 {
   "event_name": "Python Workshop",
   "date": "2026-10-07",
   "recipients": [
     {
-      "name": "John Doe",
-      "email": "john@example.com"
+      "name": "Alice Johnson",
+      "email": "alice@example.com"
     },
     {
-      "name": "Jane Doe",
-      "email": "jane@example.com"
+      "name": "Bob Smith",
+      "email": "bob@example.com"
     },
     {
-      "name": "Alex Smith",
-      "email": "alex@example.com"
+      "name": "Charlie Brown",
+      "email": "charlie@example.com"
     }
   ]
 }
+```
 
-Example Response
+Example response:
+
+```json
 {
   "job_id": "your-job-id",
   "status": "PROCESSING",
   "total": 3
 }
+```
 
-The returned job_id is used to track the progress of the certificate generation job.
-5. How to Check Job Status and Progress
+The returned `job_id` is used to track the certificate generation job.
+
+---
+
+# 6. Recipient Validation
+
+Recipient information is validated using Pydantic.
+
+Each recipient must contain:
+
+```json
+{
+  "name": "Alice Johnson",
+  "email": "alice@example.com"
+}
+```
+
+The following validations are performed:
+
+- Name cannot be empty
+- Email must be a valid email address
+- At least one recipient must be provided
+
+For example, an invalid email:
+
+```json
+{
+  "name": "Alice",
+  "email": "invalid-email"
+}
+```
+
+will result in a validation error.
+
+The API returns HTTP status:
+
+```text
+422 Unprocessable Entity
+```
+
+---
+
+# 7. How to Check Job Status and Progress
+
 Use:
+
+```http
 GET /api/jobs/{job_id}
+```
 
-Replace {job_id} with the ID returned when the job was created.
+Replace `{job_id}` with the ID returned when creating the job.
+
 Example:
-GET /api/jobs/your-job-id
 
-The response provides:
-- Job ID
-- Event name
-- Event date
-- Job status
-- Total recipients
-- Successful certificates
-- Failed certificates
-- Progress percentage
-- Individual recipient status
-- Certificate IDs
-- Error messages for failed recipients
-Example Response
+```text
+GET /api/jobs/your-job-id
+```
+
+Example response:
+
+```json
 {
   "job_id": "your-job-id",
   "event_name": "Python Workshop",
@@ -176,216 +269,427 @@ Example Response
   "recipients": [
     {
       "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
       "status": "SUCCESS",
-      "certificate_id": "certificate-uuid",
+      "certificate_id": "certificate-id-1",
       "error": null
     }
   ]
 }
+```
 
-Progress Calculation
-Progress is calculated using:
-progress = (successful + failed) / total × 100
+The `progress` value represents the percentage of recipients that have finished processing.
 
-For example:
-Total recipients: 10
-Successful: 8
-Failed: 1
-Completed: 9
+The calculation is:
 
-Progress: 90%
+```text
+progress = ((successful + failed) / total) * 100
+```
 
-When all recipients have been processed, progress becomes 100%.
-6. How to Retrieve Generated Certificates
-After a recipient is successfully processed, the job status response contains a certificate_id.
-Use:
-GET /api/jobs/certificates/{certificate_id}
+---
 
-Example:
-GET /api/jobs/certificates/your-certificate-id
+# 8. Job Statuses
 
-The API returns the generated certificate as a PDF file.
-Using Swagger
-1. Open:
-http://127.0.0.1:8000/docs
+A job can have the following statuses:
 
-2. Find:
-GET /api/jobs/certificates/{certificate_id}
+### PROCESSING
 
-3. Click Try it out.
-4. Enter the certificate_id obtained from the job status response.
-5. Click Execute.
-6. The generated PDF can be downloaded from the response.
-Generated certificate files are stored in:
-generated/
+The certificate generation job is currently being processed.
 
-7. Important Implementation / Design Decisions
-FastAPI
-FastAPI was selected because it provides:
-- Simple REST API development
-- Automatic request validation
-- Interactive Swagger documentation
-- Background task support
-- Clean API structure
-Background Processing
-FastAPI BackgroundTasks is used to process certificate generation after the job request is accepted.
-This allows the API to return a job_id without making the client wait for all certificates to finish generating.
-For this assignment, FastAPI BackgroundTasks is sufficient.
-For a production-scale system, a durable task queue such as Celery with a message broker could be introduced.
-SQLite and SQLAlchemy
-SQLite was selected as a lightweight relational database suitable for this assignment.
-SQLAlchemy is used as the ORM to manage database operations and keep the database layer modular.
-The application can be migrated to another relational database with minimal changes.
-ReportLab
-ReportLab is used to generate PDF certificates programmatically.
-A predefined certificate layout is used, and recipient-specific information such as:
-- Recipient name
-- Event name
-- Event date
-- Certificate ID
-is inserted during certificate generation.
-Individual Failure Handling
+### COMPLETED
+
+All certificates were generated successfully.
+
+### COMPLETED_WITH_ERRORS
+
+Some certificates were generated successfully while one or more recipients failed.
+
+### FAILED
+
+The complete job failed to process.
+
+---
+
+# 9. Recipient Statuses
+
 Each recipient is processed independently.
-If certificate generation fails for one recipient, the failure is recorded and processing continues for the remaining recipients.
-For example:
-Recipient 1 → SUCCESS
-Recipient 2 → FAILED
-Recipient 3 → SUCCESS
-Recipient 4 → SUCCESS
 
-The failure of one recipient does not stop the complete bulk generation job.
-If some recipients succeed and some fail, the final job status becomes:
-COMPLETED_WITH_ERRORS
+A recipient can have the following status:
 
-Database Tracking
-The database stores:
-- Job information
-- Recipient information
-- Processing status
-- Error messages
-- Certificate IDs
-- Certificate file paths
-This allows the application to track the complete certificate generation process.
-8. API Endpoints
-Method	Endpoint	Description
-POST	/api/jobs	Create a bulk certificate generation job
-GET	/api/jobs/{job_id}	Get job status and progress
-GET	/api/jobs/certificates/{certificate_id}	Retrieve generated certificate PDF
-GET	/api/jobs/health	Check API health
-
-
-9. Recipient Validation
-Incoming recipient information is validated using Pydantic.
-Each recipient must contain:
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-
-The API validates:
-- Name must not be empty
-- Email must be valid
-- At least one recipient must be provided
-Invalid requests return:
-422 Unprocessable Entity
-
-10. Job and Recipient Statuses
-Possible job statuses are:
-PROCESSING
-COMPLETED
-COMPLETED_WITH_ERRORS
-FAILED
-
-Possible recipient statuses are:
+```text
 PENDING
 SUCCESS
 FAILED
+```
 
-11. Certificate Generation Workflow
-Client
-  |
-  | POST /api/jobs
-  v
-FastAPI API
-  |
-  | Validate Request
-  v
-Create Job + Recipients
-  |
-  | Return Job ID
-  v
-Background Processing
-  |
-  +--------------------+
-  |                    |
-  v                    v
-Recipient 1          Recipient 2
-  |                    |
-  v                    v
-Generate PDF        Generate PDF
-  |                    |
-  v                    v
-SUCCESS             SUCCESS/FAILED
-  |                    |
-  +----------+---------+
-             |
-             v
-      Update Job Status
-             |
-             v
-      GET Job Status
-             |
-             v
-     Get Certificate ID
-             |
-             v
-   GET Certificate PDF
+### PENDING
 
-12. Database Design
-The application uses SQLite with SQLAlchemy.
-There are three main database tables.
-Jobs
-Stores information about each certificate generation job.
-Important fields:
-- Job ID
+The recipient is waiting to be processed.
+
+### SUCCESS
+
+The certificate was generated successfully.
+
+### FAILED
+
+Certificate generation failed for that particular recipient.
+
+The failure reason is stored in the database.
+
+---
+
+# 10. Individual Failure Handling
+
+One important requirement of the system is that a failure for one recipient must not stop certificate generation for other recipients.
+
+For example, consider three recipients:
+
+```text
+Alice   → SUCCESS
+Bob     → FAILED
+Charlie → SUCCESS
+```
+
+The system continues processing Alice and Charlie even though Bob's certificate generation failed.
+
+The failed recipient contains an error message:
+
+```json
+{
+  "status": "FAILED",
+  "error": "Certificate generation error"
+}
+```
+
+The final job status becomes:
+
+```text
+COMPLETED_WITH_ERRORS
+```
+
+This ensures that one bad record does not cause the complete batch to fail.
+
+---
+
+# 11. Certificate Generation
+
+Certificates are generated as PDF files using the ReportLab library.
+
+A single predefined certificate template is used for all recipients.
+
+The certificate contains:
+
+- Certificate title
+- Recipient name
 - Event name
 - Event date
-- Status
-- Total recipients
-- Successful count
-- Failed count
-- Creation time
-Recipients
-Stores information about individual recipients.
+- Authorized signature section
+- Unique certificate ID
+
+Example generated file:
+
+```text
+generated/certificate_<certificate-id>.pdf
+```
+
+Each certificate receives a unique UUID.
+
+---
+
+# 12. Certificate Generation Workflow
+
+The overall workflow is:
+
+```text
+Client
+   |
+   v
+POST /api/jobs
+   |
+   v
+Validate Request
+   |
+   v
+Create Job
+   |
+   v
+Store Recipients in Database
+   |
+   v
+Background Processing
+   |
+   v
+Process Each Recipient
+   |
+   +-------------------+
+   |                   |
+   v                   v
+Generate PDF        Generation Error
+   |                   |
+   v                   v
+SUCCESS              FAILED
+   |                   |
+   +---------+---------+
+             |
+             v
+      Update Job Progress
+             |
+             v
+       Complete Job
+```
+
+The generated certificate can then be retrieved using its certificate ID.
+
+---
+
+# 13. How to Retrieve Generated Certificates
+
+Use:
+
+```http
+GET /api/jobs/certificates/{certificate_id}
+```
+
+Example:
+
+```text
+GET /api/jobs/certificates/your-certificate-id
+```
+
+The API returns the generated PDF file.
+
+The response has:
+
+```text
+Content-Type: application/pdf
+```
+
+The certificate can be downloaded directly from the Swagger UI or API client.
+
+---
+
+# 14. Database Design
+
+The application uses SQLite as the relational database.
+
+The database file is:
+
+```text
+certificates.db
+```
+
+The application contains three main tables.
+
+## Jobs Table
+
+Stores information about each certificate generation job.
+
 Important fields:
-- Recipient ID
-- Job ID
-- Name
-- Email
-- Status
-- Error message
-- Certificate ID
-Certificates
+
+```text
+id
+event_name
+event_date
+status
+total
+successful
+failed
+created_at
+```
+
+## Recipients Table
+
+Stores recipient information for each job.
+
+Important fields:
+
+```text
+id
+job_id
+name
+email
+status
+error_message
+certificate_id
+```
+
+## Certificates Table
+
 Stores information about generated certificates.
+
 Important fields:
-- Certificate ID
-- Recipient ID
-- File path
-- Creation time
-Relationship:
+
+```text
+id
+recipient_id
+file_path
+created_at
+```
+
+The relationships are:
+
+```text
 Job
  |
- | 1-to-many
- v
-Recipients
- |
- | certificate reference
- v
-Certificate
+ +---- Recipient
+          |
+          +---- Certificate
+```
 
-13. Project Structure
+---
+
+# 15. Background Processing
+
+FastAPI `BackgroundTasks` is used to process certificate generation after the job creation request is completed.
+
+When a client submits a job:
+
+```text
+POST /api/jobs
+```
+
+the API:
+
+1. Validates the request.
+2. Creates a job record.
+3. Stores all recipients.
+4. Returns the job ID.
+5. Starts certificate processing in the background.
+
+This prevents the API request from having to wait for every certificate to be generated.
+
+---
+
+# 16. Important Implementation / Design Decisions
+
+## FastAPI
+
+FastAPI was selected because it provides:
+
+- Simple REST API development
+- Automatic request validation
+- Automatic Swagger documentation
+- Good support for background tasks
+- Type-safe request schemas
+
+## SQLite
+
+SQLite was selected as the relational database because:
+
+- It requires no external database server.
+- It is simple to configure.
+- It is suitable for this take-home assignment.
+- SQLAlchemy provides a clean ORM layer.
+
+## SQLAlchemy
+
+SQLAlchemy is used for:
+
+- Database models
+- Relationships
+- Database queries
+- Transaction management
+
+## ReportLab
+
+ReportLab is used to generate certificate PDFs programmatically.
+
+## BackgroundTasks
+
+FastAPI BackgroundTasks is used to process certificate generation asynchronously from the API request flow.
+
+For a larger production system, a dedicated task queue such as Celery or another distributed job-processing system could be considered.
+
+---
+
+# 17. Error Handling
+
+The application handles errors at both the API and recipient-processing levels.
+
+## API-Level Errors
+
+For example, requesting a non-existing job:
+
+```http
+GET /api/jobs/invalid-job-id
+```
+
+returns:
+
+```text
+404 Not Found
+```
+
+with:
+
+```json
+{
+  "detail": "Job not found"
+}
+```
+
+## Certificate Errors
+
+If a certificate cannot be generated for one recipient, that recipient is marked:
+
+```text
+FAILED
+```
+
+and the error message is stored.
+
+Other recipients continue processing.
+
+---
+
+# 18. Certificate Storage
+
+Generated certificates are stored in:
+
+```text
+generated/
+```
+
+Example:
+
+```text
+generated/
+├── certificate_123.pdf
+├── certificate_456.pdf
+└── certificate_789.pdf
+```
+
+Generated PDF files are excluded from Git using `.gitignore`.
+
+The database stores the file path associated with each certificate.
+
+---
+
+# 19. Health Check
+
+The API provides a health check endpoint:
+
+```http
+GET /api/jobs/health
+```
+
+Example response:
+
+```json
+{
+  "status": "healthy",
+  "message": "Jobs API is working"
+}
+```
+
+This can be used to verify that the Jobs API is running correctly.
+
+---
+
+# 20. Project Structure
+
+```text
 bulk-certificate-generator/
 │
 ├── app/
@@ -403,69 +707,171 @@ bulk-certificate-generator/
 │       ├── __init__.py
 │       └── certificate_generator.py
 │
+├── generated/
+│
+├── templates/
+│
 ├── tests/
 │   ├── __init__.py
 │   └── test_jobs.py
 │
-├── generated/
-├── requirements.txt
 ├── .gitignore
-└── README.md
+├── README.md
+└── requirements.txt
+```
 
-14. Error Handling
-The application handles errors at both request and certificate-generation levels.
-Request Validation
-Invalid recipient data is rejected before processing.
-Examples:
-- Empty recipient name
-- Invalid email address
-- Empty recipient list
-Certificate Generation Errors
-If certificate generation fails for an individual recipient, the error is stored against that recipient.
-The remaining recipients continue to be processed.
-This ensures that a single failure does not terminate the entire bulk operation.
-15. Health Check
-The API provides a health check endpoint:
-GET /api/jobs/health
+The following files are generated locally and are excluded from Git:
 
-Example response:
-{
-  "status": "healthy",
-  "message": "Jobs API is working"
-}
+```text
+venv/
+certificates.db
+generated/*.pdf
+__pycache__/
+.pytest_cache/
+```
 
-16. Generated Certificate Storage
-Generated certificates are stored in:
-generated/
+---
 
-Each certificate is assigned a unique certificate ID.
-The generated file follows the format:
-certificate_<certificate_id>.pdf
+# 21. API Endpoints
 
-Generated PDF files and the SQLite database are excluded from Git using .gitignore.
-17. Complete Example Workflow
-Step 1: Start the application
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/jobs` | Create certificate generation job |
+| GET | `/api/jobs/{job_id}` | Check job status and progress |
+| GET | `/api/jobs/certificates/{certificate_id}` | Retrieve generated certificate |
+| GET | `/api/jobs/health` | Check API health |
+
+---
+
+# 22. Complete Example Workflow
+
+## Step 1: Start the Application
+
+```bash
 uvicorn app.main:app --reload
+```
 
-Step 2: Open Swagger
+## Step 2: Open Swagger
+
+```text
 http://127.0.0.1:8000/docs
+```
 
-Step 3: Submit a certificate generation request
+## Step 3: Create a Job
+
 Use:
+
+```http
 POST /api/jobs
+```
 
-with the event information and recipient list.
-Step 4: Copy the returned job ID
+with:
+
+```json
+{
+  "event_name": "Python Workshop",
+  "date": "2026-10-07",
+  "recipients": [
+    {
+      "name": "Alice Johnson",
+      "email": "alice@example.com"
+    },
+    {
+      "name": "Bob Smith",
+      "email": "bob@example.com"
+    }
+  ]
+}
+```
+
+## Step 4: Copy the Job ID
+
+Example:
+
+```text
 your-job-id
+```
 
-Step 5: Check job status
+## Step 5: Check Job Status
+
 Use:
-GET /api/jobs/{job_id}
 
-Step 6: Get the certificate ID
-After successful processing, obtain the certificate_id from the recipient information.
-Step 7: Retrieve the certificate
+```http
+GET /api/jobs/your-job-id
+```
+
+Wait until the status becomes:
+
+```text
+COMPLETED
+```
+
+or:
+
+```text
+COMPLETED_WITH_ERRORS
+```
+
+## Step 6: Copy the Certificate ID
+
+From the recipient information:
+
+```json
+{
+  "certificate_id": "your-certificate-id"
+}
+```
+
+## Step 7: Retrieve the Certificate
+
 Use:
-GET /api/jobs/certificates/{certificate_id}
 
-The generated PDF certificate will be returned.
+```http
+GET /api/jobs/certificates/your-certificate-id
+```
+
+The generated PDF will be returned.
+
+---
+
+# 23. Testing Summary
+
+The project includes automated tests for the required functionality.
+
+The test suite verifies:
+
+```text
+Job Creation
+     ↓
+Recipient Validation
+     ↓
+Certificate Generation
+     ↓
+Job Status
+     ↓
+Progress Tracking
+     ↓
+Individual Failure Handling
+     ↓
+Certificate Retrieval
+```
+
+Run all tests using:
+
+```bash
+pytest -v
+```
+
+Expected result:
+
+```text
+7 passed
+```
+
+---
+
+# 24. Repository
+
+GitHub Repository:
+
+https://github.com/Amruthadandigimath/bulk-certificate-generator
